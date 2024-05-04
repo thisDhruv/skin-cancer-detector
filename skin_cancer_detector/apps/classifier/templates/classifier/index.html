@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skin Cancer Detection App</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover;
+            background-position: center;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="file"] {
+            margin-bottom: 20px;
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #load_model {
+            margin-bottom: 20px;
+        }
+        #fruit-container {
+            border-radius: 5px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Skin Cancer Detection App</h1>
+        <button id="load_model">Load Model</button>
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="image" accept="image/*">
+            <br>
+            <button type="submit">Get Classification</button>
+        </form>
+        
+        <div id="fruit-container">
+            {{ fruit_name }}
+        </div>
+    </div>
+    <script>
+        var model_loaded = false 
+        document.querySelector('form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            if (!model_loaded){
+                document.getElementById('fruit-container').innerHTML = "Please load the model first";
+                return;
+            }
+            const formData = new FormData();
+            formData.append('image', document.querySelector('input[type=file]').files[0]);
+            fetch('/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('fruit-container').innerHTML = data;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+        document.getElementById("load_model").addEventListener('click', function(event){
+            fetch('/load_model')
+            .then(response => response.text())
+            .then(data => {
+                model_loaded = true
+                document.getElementById('fruit-container').innerHTML = data;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
